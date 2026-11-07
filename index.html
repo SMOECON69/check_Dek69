@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+  <link href="https://fonts.googleapis.com/css2?family=Prompt:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+      font-family: 'Prompt', sans-serif;
+      background-color: #F4F3EF;
+      color: #111111;
+      user-select: none;
+      width: 100%;
+      max-width: 100%;
+      margin: 0 auto;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      padding-bottom: 32px;
+    }
+    .hidden { display: none !important; }
+    button, input, select { font-family: 'Prompt', sans-serif; }
+
+    .sec {
+      margin: 12px 14px 0 14px;
+      padding: 20px 18px;
+      background: #FFFFFF;
+      border-radius: 28px;
+      box-shadow: 0 8px 24px -4px rgba(17, 17, 17, 0.05);
+    }
+    .row-item { padding: 12px 4px; border-bottom: 1px solid #F0EFEA; display: flex; justify-content: space-between; align-items: center; }
+    .row-item:last-child { border-bottom: none; }
+    .btn-luxe { background: #111111; color: #FFFFFF; border: none; border-radius: 999px; font-weight: 700; padding: 12px 18px; cursor: pointer; width: 100%; font-size: 13px; text-align: center; text-decoration: none; display: inline-block; }
+    .btn-luxe:active { transform: scale(0.98); opacity: 0.9; }
+    .btn-pill { background: #F4F3EF; color: #111111; border: none; border-radius: 999px; padding: 7px 14px; font-size: 11px; font-weight: 700; cursor: pointer; text-decoration: none; display: inline-block; }
+    .inp { width: 100%; background: #F4F3EF; border: 1.5px solid transparent; border-radius: 999px; padding: 11px 18px; font-size: 13px; font-weight: 600; outline: none; }
+    .inp:focus { border-color: #111111; background: #FFFFFF; }
+
+    .grid-dots { display: grid; grid-template-columns: repeat(5, 1fr); gap: 10px; align-items: start; }
+    @media (min-width: 768px) {
+      .sec { margin: 16px 28px 0 28px; padding: 24px 28px; }
+      .grid-dots { grid-template-columns: repeat(10, 1fr); gap: 14px; }
+    }
+    .grid-2 { display: grid; grid-template-columns: repeat(2, 1fr); gap: 8px; }
+    .grid-3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+    .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+
+    .dot-circle { width: 44px; height: 44px; border-radius: 50%; display: flex; flex-direction: column; align-items: center; justify-content: center; font-weight: 700; font-size: 11px; margin: 0 auto; transition: transform 0.1s; }
+    .dot-circle:active { transform: scale(0.9); }
+    .dh-grey { background: #E5E4DF; color: #555555; }
+    .dh-yellow { background: #FACC15; color: #111111; }
+    .dh-orange { background: #F97316; color: #FFFFFF; }
+    .dh-green { background: #10B981; color: #FFFFFF; }
+    .in-my-cart-ring { box-shadow: 0 0 0 3.5px #111111; }
+
+    .staff-car-pill { display: inline-block; font-size: 9px; font-weight: 700; color: #FFFFFF; background: #111111; padding: 1.5px 6px; border-radius: 999px; margin-top: 2px; max-width: 68px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .status-tag { display: inline-block; font-size: 10px; font-weight: 700; padding: 3px 10px; border-radius: 999px; }
+    .toast-popup { position: fixed; top: 14px; left: 14px; right: 14px; max-width: 520px; margin: 0 auto; z-index: 99; background: #111111; color: #FFFFFF; border-radius: 999px; padding: 12px 20px; box-shadow: 0 10px 25px rgba(0,0,0,0.25); }
+  </style>
+</head>
+<body>
+
+  <div id="dh-toast" class="toast-popup hidden">
+    <p id="dh-toast-txt" style="font-size:12px; font-weight:700; color:#FFFFFF; text-align:center;"></p>
+  </div>
+
+  <div id="auth-gate-screen" class="hidden" style="flex:1; display:flex; flex-direction:column; justify-content:center; padding:24px; max-width:520px; margin:0 auto; width:100%;">
+    <div class="sec" style="text-align:center; padding:32px 24px;">
+      <h2 style="font-size:20px; font-weight:800; color:#E11D48; margin-bottom:8px;">กรุณาล็อกอินจากเว็บหลักก่อน</h2>
+      <p style="font-size:12px; color:#666666; margin-bottom:24px;">ระบบเช็คชื่อลงดอยจะดึงชื่อสตาฟผู้ควบคุมที่อยู่บนรถกับน้องมาจากเว็บแรกโดยอัตโนมัติ</p>
+      <a id="link-gate-back" href="<?= baseUrl ?>?page=main" target="_top" class="btn-luxe">⬅ กลับไปหน้าล็อกอินเว็บหลัก</a>
+    </div>
+  </div>
+
+  <div id="downhill-app" class="hidden">
+    <div style="background:#111111; color:#FFF; padding:12px 24px; display:flex; justify-content:space-between; align-items:center; border-radius:0 0 24px 24px; position:sticky; top:0; z-index:30;">
+      <div>
+        <span style="font-size:9px; color:#F43F5E; font-weight:700; letter-spacing:1px; display:block;">DOWNHILL CHECK-IN • ซิงก์ชีทแยกขาลง</span>
+        <b id="dh-staff-label" style="font-size:13px;">-</b>
+      </div>
+      <a id="link-back-main-web" href="<?= baseUrl ?>?page=main" target="_top" class="btn-pill" style="background:#D91B5C; color:#FFF;">
+        ⬅ กลับเว็บหลัก
+      </a>
+    </div>
+
+    <div class="sec">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:10px;">
+        <span style="font-size:13px; font-weight:800;">ยอดรวมขาลง (ชีท Downhill_Checkin_Status)</span>
+        <span id="dh-total-stu" style="font-size:11px; font-weight:700; color:#666666;">ทั้งหมด 0 คน</span>
+      </div>
+      <div class="grid-4" style="text-align:center;">
+        <div style="background:#F4F3EF; padding:10px 4px; border-radius:18px;">
+          <p style="font-size:9px; font-weight:700; color:#555555;">⚪ รอขึ้นรถ</p>
+          <p id="cnt-grey" style="font-size:16px; font-weight:800;">0</p>
+        </div>
+        <div style="background:#FEF9C3; padding:10px 4px; border-radius:18px;">
+          <p style="font-size:9px; font-weight:700; color:#854D0E;">🟡 ขึ้นรถลง</p>
+          <p id="cnt-yellow" style="font-size:16px; font-weight:800; color:#854D0E;">0</p>
+        </div>
+        <div style="background:#FFEDD5; padding:10px 4px; border-radius:18px;">
+          <p style="font-size:9px; font-weight:700; color:#9A3412;">🟠 หน้ามอ</p>
+          <p id="cnt-orange" style="font-size:16px; font-weight:800; color:#C2410C;">0</p>
+        </div>
+        <div style="background:#D1FAE5; padding:10px 4px; border-radius:18px;">
+          <p style="font-size:9px; font-weight:700; color:#065F46;">🟢 ถึงคณะ/กลับเอง</p>
+          <p id="cnt-green" style="font-size:16px; font-weight:800; color:#047857;">0</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:8px;">
+        <div>
+          <h2 style="font-size:15px; font-weight:800;">🛒 น้องที่ขึ้นรถลงดอยมากับฉัน</h2>
+          <p style="font-size:11px; color:#666666;">หยิบใส่ตะกร้าครั้งเดียว ชื่อจะค้างไว้ตลอด (หากกดลบออก ชื่อคุณใต้วงกลมน้องจะถูกลบออกทันที)</p>
+        </div>
+        <span id="cart-counter-badge" style="font-size:12px; font-weight:800; color:#FFFFFF; background:#111111; padding:4px 14px; border-radius:999px; flex-shrink:0;">0 คน</span>
+      </div>
+
+      <div style="display:flex; gap:6px; flex-wrap:wrap; margin-bottom:10px;">
+        <button type="button" id="btn-import-uphill-group" class="btn-pill" style="background:#111111; color:#FDE047;">
+          ⚡ ดึงน้องที่ฉันดูแลตอนขาขึ้นเข้าตะกร้า
+        </button>
+        <button type="button" id="btn-clear-cart" class="btn-pill" style="color:#E11D48; background:#FFF1F2;">
+          ✕ ล้างตะกร้าทั้งหมด (ลบชื่อสตาฟใต้วงกลมออก)
+        </button>
+      </div>
+
+      <input id="cart-search-4" type="text" placeholder="➕ พิมพ์รหัส 4 ตัวท้าย หรือแตะวงกลมด้านล่างเพื่อเพิ่มเข้าตะกร้า..." class="inp" style="margin-bottom:6px;">
+      <div id="cart-search-results"></div>
+
+      <div style="margin-top:12px; padding:16px; background:#F4F3EF; border-radius:24px;">
+        <p style="font-size:11px; font-weight:700; color:#111111; text-align:center; margin-bottom:10px;">
+          กดอัปเดตสถานะให้ทุกคนในตะกร้าพร้อมกัน (บันทึกชื่อคุณเป็นสตาฟประจำรถให้น้องทันที)
+        </p>
+        <div class="grid-3" style="margin-bottom:12px;">
+          <button type="button" data-stage="1. ขึ้นรถลงดอย" class="btn-checkout btn-luxe" style="background:#FACC15; color:#111111; padding:11px 4px; font-size:11px;">
+            🟡 1. ขึ้นรถลง
+          </button>
+          <button type="button" data-stage="2. ถึงหน้ามอ (เดินกลับคณะ)" class="btn-checkout btn-luxe" style="background:#F97316; color:#FFFFFF; padding:11px 4px; font-size:11px;">
+            🟠 2. ถึงหน้ามอ
+          </button>
+          <button type="button" data-stage="3. ถึงคณะเศรษฐศาสตร์" class="btn-checkout btn-luxe" style="background:#10B981; color:#FFFFFF; padding:11px 4px; font-size:11px;">
+            🟢 3. ถึงคณะ 🏁
+          </button>
+        </div>
+
+        <div id="cart-selected-items"></div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:12px;">
+        <div>
+          <h3 style="font-size:15px; font-weight:800;">รายชื่อเรียงตามรหัส (น้อย ➔ มาก)</h3>
+          <p style="font-size:11px; color:#666666;">แตะวงกลมเพื่อเลือกเข้าตะกร้า • แตะซ้ำหรือกด ✕ เพื่อลบชื่อสตาฟใต้วงกลมออก</p>
+        </div>
+      </div>
+
+      <div class="grid-2" style="margin-bottom:16px;">
+        <select id="dh-status-filter" class="inp" style="padding:9px 14px; font-size:12px;">
+          <option value="ALL" selected>แสดงทุกคน (เรียงรหัสน้อยไปมาก)</option>
+          <option value="0.">เฉพาะ ⚪ รอขึ้นรถลงดอย</option>
+          <option value="1.">เฉพาะ 🟡 ขึ้นรถลงดอยแล้ว</option>
+          <option value="2.">เฉพาะ 🟠 ถึงหน้ามอ</option>
+          <option value="3.">เฉพาะ 🟢 ถึงคณะ / แยกกลับเอง</option>
+        </select>
+        <input id="dh-grid-search" type="text" placeholder="🔍 กรองรหัส 4 ตัวท้าย..." class="inp" style="padding:9px 14px; font-size:12px;">
+      </div>
+
+      <div id="dh-sorted-dots-grid" class="grid-dots"></div>
+    </div>
+  </div>
+
+  <div id="split-modal" class="hidden" style="position:fixed; inset:0; background:rgba(17,17,17,0.55); backdrop-filter:blur(3px); z-index:60; display:flex; align-items:center; justify-content:center; padding:20px;">
+    <div style="background:#FFFFFF; border-radius:28px; padding:22px 20px; width:100%; max-width:380px; box-shadow:0 20px 40px rgba(0,0,0,0.2);">
+      <h3 id="sp-stu-title" style="font-size:16px; font-weight:800; margin-bottom:6px;">แจ้งแยกกลับเองที่หน้ามอ</h3>
+      <p style="font-size:11px; color:#555555; margin-bottom:12px;">จุดของน้องจะเปลี่ยนเป็น <b>🟢 สีเขียว (กลับปลอดภัย)</b> พร้อมหมายเหตุกำกับ</p>
+
+      <div style="display:flex; flex-wrap:wrap; gap:6px; margin-bottom:10px;">
+        <button type="button" data-note="กลับแกร็บ (Grab)" class="sp-chip btn-pill">🚕 กลับแกร็บ (Grab)</button>
+        <button type="button" data-note="ผู้ปกครองรับที่หน้ามอ" class="sp-chip btn-pill">🚗 ผปค.รับหน้ามอ</button>
+        <button type="button" data-note="เพื่อน/รุ่นพี่รับกลับหอ" class="sp-chip btn-pill">🛵 เพื่อนรับกลับหอ</button>
+      </div>
+
+      <input id="sp-note-in" type="text" value="กลับแกร็บ (Grab)" class="inp" style="margin-bottom:14px;">
+
+      <div class="grid-2">
+        <button type="button" id="btn-cancel-split" class="btn-pill" style="padding:12px;">ยกเลิก</button>
+        <button type="button" id="btn-confirm-split" class="btn-luxe" style="background:#059669; padding:12px;">✓ ยืนยัน (เปลี่ยนเป็นสีเขียว)</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var SERVER_BASE_URL = '<?= baseUrl ?>';
+    var STORAGE_USER_KEY = 'ECON_TREK69_ACTIVE_USER';
+    var STORAGE_MY_DH_CART_PREFIX = 'ECON_TREK69_PERSIST_CART_';
+
+    var dhState = {
+      webAppUrl: SERVER_BASE_URL || '',
+      staffUser: null,
+      cartIds: [],
+      splittingStuId: null,
+      studentByLast4: {},
+      students: [
+        { id: '691610001', last4: '0001', name: 'กชพร อิ่มเอิบ', nick: 'อิงดาว', col: 'คอลัมน์ 1', staffId: '', staffLast4: '', downhillStatus: '0. รอขึ้นรถลงดอย', downhillStaffName: '-', downhillStaffId: '', downhillNote: '-' },
+        { id: '691610002', last4: '0002', name: 'กตัญชลี สุดถนอม', nick: 'เหนือ', col: 'คอลัมน์ 1', staffId: '', staffLast4: '', downhillStatus: '0. รอขึ้นรถลงดอย', downhillStaffName: '-', downhillStaffId: '', downhillNote: '-' }
+      ]
+    };
+
+    function updateMainWebLinks() {
+      var targetUrl = (dhState.webAppUrl || window.location.pathname) + '?page=main';
+      var b1 = document.getElementById('link-back-main-web');
+      var b2 = document.getElementById('link-gate-back');
+      if (b1) b1.href = targetUrl;
+      if (b2) b2.href = targetUrl;
+    }
+
+    function sortStudentsByCodeAscending() {
+      dhState.students.sort(function(a, b) { return Number(a.last4) - Number(b.last4); });
+    }
+
+    function getCartStorageKey() {
+      var uid = dhState.staffUser ? dhState.staffUser.id : 'DEFAULT';
+      return STORAGE_MY_DH_CART_PREFIX + uid;
+    }
+
+    function loadSavedCartFromPhone() {
+      try {
+        var raw = localStorage.getItem(getCartStorageKey());
+        if (raw) {
+          var arr = JSON.parse(raw);
+          if (Array.isArray(arr)) dhState.cartIds = arr;
+        }
+      } catch (e) {}
+    }
+
+    function saveCartToPhone() {
+      try { localStorage.setItem(getCartStorageKey(), JSON.stringify(dhState.cartIds)); } catch (e) {}
+    }
+
+    function rebuildDhMap() {
+      dhState.studentByLast4 = {};
+      dhState.students.forEach(function(s) { dhState.studentByLast4[s.last4] = s; });
+    }
+
+    function getLoggedStaffUser() {
+      try {
+        var raw = localStorage.getItem(STORAGE_USER_KEY);
+        if (raw) {
+          var parsed = JSON.parse(raw);
+          if (parsed && parsed.id) return parsed;
+        }
+      } catch (e) {}
+      var params = new URLSearchParams(window.location.search);
+      var uid = params.get('uid');
+      var unick = params.get('unick');
+      var udept = params.get('udept');
+      if (uid) {
+        var u = { id: uid, last4: uid.slice(-4), nick: unick || uid, dept: udept || 'สตาฟ' };
+        try { localStorage.setItem(STORAGE_USER_KEY, JSON.stringify(u)); } catch (e) {}
+        return u;
+      }
+      return null;
+    }
+
+    document.addEventListener('DOMContentLoaded', function() {
+      updateMainWebLinks();
+      rebuildDhMap();
+      dhState.staffUser = getLoggedStaffUser();
+
+      if (!dhState.staffUser) {
+        document.getElementById('auth-gate-screen').classList.remove('hidden');
+        document.getElementById('downhill-app').classList.add('hidden');
+      } else {
+        loadSavedCartFromPhone();
+        document.getElementById('auth-gate-screen').classList.add('hidden');
+        document.getElementById('downhill-app').classList.remove('hidden');
+        document.getElementById('dh-staff-label').textContent =
+          'สตาฟประจำรถ: ' + dhState.staffUser.nick + ' (' + dhState.staffUser.last4 + ')';
+        renderDownhillApp();
+      }
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.withSuccessHandler(function(res) {
+          if (res && res.ok) {
+            if (res.webAppUrl) {
+              dhState.webAppUrl = res.webAppUrl;
+              updateMainWebLinks();
+            }
+            dhState.students = (res.people || []).filter(function(p) { return !p.isStaff; });
+            sortStudentsByCodeAscending();
+            if (dhState.staffUser) renderDownhillApp();
+          }
+        }).loadAllDataFromActiveSheet();
+      }
+
+      document.getElementById('btn-import-uphill-group').addEventListener('click', function() {
+        autoImportUphillGroup(false);
+      });
+
+      document.getElementById('cart-search-4').addEventListener('input', renderSearch4ForCart);
+
+      // แก้บั๊กปุ่ม "ล้างตะกร้าทั้งหมด": ล้างทั้งตะกร้า + ลบชื่อสตาฟใต้วงกลมออก + รีเซ็ตเป็นสีเทาในชีททันที!
+      document.getElementById('btn-clear-cart').addEventListener('click', clearAllFromMyCartAndResetStaffName);
+
+      document.querySelectorAll('.btn-checkout').forEach(function(btn) {
+        btn.addEventListener('click', function() {
+          updateAllInPersistentCart(this.getAttribute('data-stage'));
+        });
+      });
+
+      document.querySelectorAll('.sp-chip').forEach(function(chip) {
+        chip.addEventListener('click', function() {
+          document.getElementById('sp-note-in').value = this.getAttribute('data-note');
+        });
+      });
+      document.getElementById('btn-cancel-split').addEventListener('click', function() {
+        document.getElementById('split-modal').classList.add('hidden');
+      });
+      document.getElementById('btn-confirm-split').addEventListener('click', confirmSingleStudentSplitGrab);
+
+      document.getElementById('dh-status-filter').addEventListener('change', renderDownhillApp);
+      document.getElementById('dh-grid-search').addEventListener('input', renderDownhillApp);
+    });
+
+    function autoImportUphillGroup(silent) {
+      if (!dhState.staffUser) return;
+      var myLabel = dhState.staffUser.nick + ' (' + dhState.staffUser.last4 + ')';
+      var count = 0;
+      dhState.students.forEach(function(s) {
+        if (s.staffId === dhState.staffUser.id) {
+          if (dhState.cartIds.indexOf(s.id) === -1) {
+            dhState.cartIds.push(s.id);
+            s.downhillStaffName = myLabel;
+            s.downhillStaffId = dhState.staffUser.id;
+            count++;
+          }
+        }
+      });
+      saveCartToPhone();
+      renderDownhillApp();
+      if (!silent) {
+        if (count > 0) showDhToast('ดึงน้องที่ดูแลตอนขาขึ้นเข้าตะกร้า ' + count + ' คนแล้ว');
+        else showDhToast('แตะเลือกน้องจากวงกลมด้านล่างเข้าตะกร้าได้เลยครับ');
+      }
+    }
+
+    // แก้บั๊กสำคัญ: เมื่อกดเลือกเข้าตะกร้าจะขึ้นชื่อสตาฟ แต่พอกดซ้ำหรือกด ✕ ลบออก ชื่อสตาฟใต้วงกลมต้องหายไปทันทีและซิงก์ล้างในชีทด้วย!
+    function toggleStudentInCart(stuId) {
+      var s = dhState.students.find(function(x) { return x.id === stuId; });
+      var myLabel = dhState.staffUser ? (dhState.staffUser.nick + ' (' + dhState.staffUser.last4 + ')') : 'สตาฟ';
+      var idx = dhState.cartIds.indexOf(stuId);
+
+      if (idx === -1) {
+        // กรณีเพิ่มเข้าตะกร้า
+        dhState.cartIds.push(stuId);
+        if (s) {
+          s.downhillStaffName = myLabel;
+          s.downhillStaffId = dhState.staffUser ? dhState.staffUser.id : '';
+        }
+        saveCartToPhone();
+        renderDownhillApp();
+      } else {
+        // กรณีกดลบออกจากตะกร้า -> ล้างชื่อสตาฟใต้วงกลมออกทันที และคืนค่าเป็นสีเทา (0. รอขึ้นรถลงดอย)
+        dhState.cartIds.splice(idx, 1);
+        saveCartToPhone();
+        if (s) {
+          s.downhillStaffName = '-';
+          s.downhillStaffId = '';
+          s.downhillStatus = '0. รอขึ้นรถลงดอย';
+          s.downhillNote = '-';
+          renderDownhillApp();
+          showDhToast('ลบ "' + s.nick + '" ออกจากตะกร้าและเอาชื่อสตาฟออกแล้ว');
+
+          if (typeof google !== 'undefined' && google.script && google.script.run) {
+            google.script.run.saveActionToSheet({
+              actorId: dhState.staffUser ? dhState.staffUser.id : '-',
+              actorName: myLabel,
+              actorDept: dhState.staffUser ? dhState.staffUser.dept : '-',
+              actionType: 'DOWNHILL_REMOVE_FROM_CART',
+              cpName: '0. รอขึ้นรถลงดอย',
+              col: s.col,
+              targetId: s.id,
+              targetName: s.nick + ' (' + s.last4 + ')',
+              detail: 'นำออกจากตะกร้าขาลงและล้างชื่อสตาฟประจำรถ',
+              syncRedCar: false,
+              peopleToUpdate: [s]
+            });
+          }
+        } else {
+          renderDownhillApp();
+        }
+      }
+    }
+
+    // แก้บั๊กปุ่ม "ล้างตะกร้าทั้งหมด": ล้างชื่อสตาฟใต้วงกลมของทุกคนที่เคยอยู่ในตะกร้าออกให้หมด!
+    function clearAllFromMyCartAndResetStaffName() {
+      if (dhState.cartIds.length === 0) return;
+      var myLabel = dhState.staffUser ? (dhState.staffUser.nick + ' (' + dhState.staffUser.last4 + ')') : 'สตาฟ';
+      var clearedPeople = [];
+
+      dhState.students.forEach(function(s) {
+        if (dhState.cartIds.indexOf(s.id) !== -1) {
+          s.downhillStaffName = '-';
+          s.downhillStaffId = '';
+          s.downhillStatus = '0. รอขึ้นรถลงดอย';
+          s.downhillNote = '-';
+          clearedPeople.push(s);
+        }
+      });
+
+      dhState.cartIds = [];
+      saveCartToPhone();
+      renderDownhillApp();
+      showDhToast('ล้างตะกร้าและเอาชื่อสตาฟใต้วงกลมออกทั้งหมดแล้ว');
+
+      if (clearedPeople.length > 0 && typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.saveActionToSheet({
+          actorId: dhState.staffUser ? dhState.staffUser.id : '-',
+          actorName: myLabel,
+          actorDept: dhState.staffUser ? dhState.staffUser.dept : '-',
+          actionType: 'DOWNHILL_CLEAR_CART',
+          cpName: '0. รอขึ้นรถลงดอย',
+          col: 'ขาลง',
+          targetId: clearedPeople.map(function(x) { return x.last4; }).join(','),
+          targetName: clearedPeople.length + ' คน',
+          detail: 'ล้างตะกร้าขาลงและเอาชื่อสตาฟประจำรถออก',
+          syncRedCar: false,
+          peopleToUpdate: clearedPeople
+        });
+      }
+    }
+
+    function renderSearch4ForCart() {
+      var q = document.getElementById('cart-search-4').value.trim().toLowerCase();
+      var box = document.getElementById('cart-search-results');
+      box.innerHTML = '';
+      if (!q) return;
+
+      var matches = dhState.students.filter(function(s) {
+        return s.last4.indexOf(q) !== -1 || s.id.indexOf(q) !== -1 || s.nick.toLowerCase().indexOf(q) !== -1;
+      }).slice(0, 6);
+
+      matches.forEach(function(s) {
+        var inCart = dhState.cartIds.indexOf(s.id) !== -1;
+        var row = document.createElement('div');
+        row.className = 'row-item';
+        row.innerHTML = '<div><b style="font-size:13px;">' + s.nick + ' (' + s.last4 + ')</b> — <span style="font-size:12px; color:#666666;">' + s.name + '</span></div>' +
+          '<button type="button" class="btn-pill" style="background:' + (inCart ? '#059669; color:#FFF' : '#111111; color:#FFF') + ';">' + (inCart ? '✓ อยู่ในตะกร้าแล้ว' : '+ ใส่ตะกร้า') + '</button>';
+        row.querySelector('button').addEventListener('click', function() {
+          if (dhState.cartIds.indexOf(s.id) === -1) toggleStudentInCart(s.id);
+          document.getElementById('cart-search-4').value = '';
+          box.innerHTML = '';
+        });
+        box.appendChild(row);
+      });
+    }
+
+    function updateAllInPersistentCart(stageName) {
+      if (dhState.cartIds.length === 0) {
+        showDhToast('กรุณาแตะเลือกน้องเข้าตะกร้าก่อนครับ');
+        return;
+      }
+
+      var myLabel = dhState.staffUser.nick + ' (' + dhState.staffUser.last4 + ')';
+      var updatedPeople = [];
+
+      dhState.students.forEach(function(s) {
+        if (dhState.cartIds.indexOf(s.id) !== -1) {
+          if (stageName.indexOf('2.') === 0 && s.downhillStatus.indexOf('3. แยกกลับเอง') === 0) return;
+          s.downhillStatus = stageName;
+          s.downhillStaffName = myLabel;
+          s.downhillStaffId = dhState.staffUser.id;
+          if (stageName.indexOf('3. ถึงคณะ') === 0 && s.downhillNote === '-') s.downhillNote = '-';
+          updatedPeople.push(s);
+        }
+      });
+
+      showDhToast('✓ อัปเดต "' + stageName + '" (' + updatedPeople.length + ' คน • ดูแลโดยพี่' + dhState.staffUser.nick + ')');
+      renderDownhillApp();
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.saveActionToSheet({
+          actorId: dhState.staffUser.id, actorName: myLabel, actorDept: dhState.staffUser.dept,
+          actionType: 'DOWNHILL_BATCH_STAGE', cpName: stageName, col: 'ขาลง',
+          targetId: updatedPeople.map(function(x) { return x.last4; }).join(','),
+          targetName: updatedPeople.length + ' คน',
+          detail: stageName + ' (สตาฟบนรถ: ' + myLabel + ')',
+          syncRedCar: false, peopleToUpdate: updatedPeople
+        });
+      }
+    }
+
+    function openSplitModalForStudent(stuId) {
+      dhState.splittingStuId = stuId;
+      var s = dhState.students.find(function(x) { return x.id === stuId; });
+      if (!s) return;
+      document.getElementById('sp-stu-title').textContent = '🚕 แยกกลับเอง: ' + s.nick + ' (' + s.last4 + ')';
+      document.getElementById('sp-note-in').value = (s.downhillNote && s.downhillNote !== '-') ? s.downhillNote : 'กลับแกร็บ (Grab)';
+      document.getElementById('split-modal').classList.remove('hidden');
+    }
+
+    function confirmSingleStudentSplitGrab() {
+      var s = dhState.students.find(function(x) { return x.id === dhState.splittingStuId; });
+      if (!s) return;
+      var noteTxt = document.getElementById('sp-note-in').value.trim() || 'กลับแกร็บ (Grab)';
+      var myLabel = dhState.staffUser.nick + ' (' + dhState.staffUser.last4 + ')';
+
+      s.downhillStatus = '3. แยกกลับเองที่หน้ามอ';
+      s.downhillStaffName = myLabel;
+      s.downhillStaffId = dhState.staffUser.id;
+      s.downhillNote = noteTxt;
+
+      document.getElementById('split-modal').classList.add('hidden');
+      showDhToast('🟢 บันทึก "' + s.nick + '" แยกกลับเอง (' + noteTxt + ') เรียบร้อย');
+      renderDownhillApp();
+
+      if (typeof google !== 'undefined' && google.script && google.script.run) {
+        google.script.run.saveActionToSheet({
+          actorId: dhState.staffUser.id, actorName: myLabel, actorDept: dhState.staffUser.dept,
+          actionType: 'DOWNHILL_SPLIT_GRAB', cpName: '3. แยกกลับเองที่หน้ามอ', col: s.col,
+          targetId: s.id, targetName: s.nick + ' (' + s.last4 + ')',
+          detail: 'แยกกลับเอง: ' + noteTxt + ' (แจ้งโดย ' + myLabel + ')',
+          syncRedCar: false, peopleToUpdate: [s]
+        });
+      }
+    }
+
+    function getDownhillDotClass(statusStr) {
+      var st = String(statusStr || '');
+      if (st.indexOf('1.') === 0) return 'dh-yellow';
+      if (st.indexOf('2.') === 0) return 'dh-orange';
+      if (st.indexOf('3.') === 0) return 'dh-green';
+      return 'dh-grey';
+    }
+
+    function getStatusBadgeHtml(s) {
+      var st = String(s.downhillStatus || '');
+      var stf = (s.downhillStaffName && s.downhillStaffName !== '-') ? (' • 🚌 พี่' + s.downhillStaffName.split(' ')[0]) : '';
+      if (st.indexOf('1.') === 0) return '<span class="status-tag" style="background:#FEF08A; color:#854D0E;">🟡 1. บนรถลงดอย' + stf + '</span>';
+      if (st.indexOf('2.') === 0) return '<span class="status-tag" style="background:#FFEDD5; color:#C2410C;">🟠 2. ถึงหน้ามอ' + stf + '</span>';
+      if (st.indexOf('3.') === 0) {
+        var note = (s.downhillNote && s.downhillNote !== '-') ? (' • ' + s.downhillNote) : ' • ถึงคณะแล้ว';
+        return '<span class="status-tag" style="background:#D1FAE5; color:#047857;">🟢 3. ปลอดภัย' + note + stf + '</span>';
+      }
+      return '<span class="status-tag" style="background:#E5E4DF; color:#555555;">⚪ รอขึ้นรถลงดอย</span>';
+    }
+
+    function renderDownhillApp() {
+      var all = dhState.students;
+      document.getElementById('dh-total-stu').textContent = 'ทั้งหมด ' + all.length + ' คน';
+      document.getElementById('cnt-grey').textContent = all.filter(function(s) { return s.downhillStatus.indexOf('0.') === 0; }).length;
+      document.getElementById('cnt-yellow').textContent = all.filter(function(s) { return s.downhillStatus.indexOf('1.') === 0; }).length;
+      document.getElementById('cnt-orange').textContent = all.filter(function(s) { return s.downhillStatus.indexOf('2.') === 0; }).length;
+      document.getElementById('cnt-green').textContent = all.filter(function(s) { return s.downhillStatus.indexOf('3.') === 0; }).length;
+
+      document.getElementById('cart-counter-badge').textContent = 'ในตะกร้า ' + dhState.cartIds.length + ' คน';
+
+      var cartBox = document.getElementById('cart-selected-items');
+      cartBox.innerHTML = '';
+      if (dhState.cartIds.length === 0) {
+        cartBox.innerHTML = '<p style="text-align:center; color:#888888; padding:10px 0; font-size:12px;">ยังไม่มีรายชื่อในตะกร้า แตะที่จุดวงกลมด้านล่างเพื่อเลือกน้องที่ขึ้นรถคันเดียวกับคุณได้เลย</p>';
+      } else {
+        dhState.cartIds.forEach(function(id, idx) {
+          var s = all.find(function(x) { return x.id === id; });
+          if (!s) return;
+          var item = document.createElement('div');
+          item.className = 'row-item';
+          item.innerHTML =
+            '<div style="flex:1;">' +
+              '<p style="font-size:13px; font-weight:800;">' + (idx + 1) + '. ' + s.nick + ' <span style="color:#D91B5C;">(' + s.last4 + ')</span> — <span style="font-weight:500; font-size:12px; color:#555555;">' + s.name + '</span></p>' +
+              '<div style="margin-top:3px;">' + getStatusBadgeHtml(s) + '</div>' +
+            '</div>' +
+            '<div style="display:flex; gap:6px; align-items:center; flex-shrink:0;">' +
+              '<button type="button" class="btn-split-grab btn-pill" style="background:#D1FAE5; color:#047857; padding:6px 10px;">🚕 แยกกลับเอง</button>' +
+              '<button type="button" class="btn-del-cart" style="background:#FFF1F2; color:#E11D48; border:none; border-radius:999px; width:28px; height:28px; font-weight:800; font-size:11px; cursor:pointer;" title="ลบออกและเอาชื่อสตาฟใต้วงกลมออก">✕</button>' +
+            '</div>';
+
+          item.querySelector('.btn-split-grab').addEventListener('click', function() { openSplitModalForStudent(s.id); });
+          item.querySelector('.btn-del-cart').addEventListener('click', function() { toggleStudentInCart(s.id); });
+          cartBox.appendChild(item);
+        });
+      }
+
+      var statusFilter = document.getElementById('dh-status-filter').value;
+      var qSearch = document.getElementById('dh-grid-search').value.trim().toLowerCase();
+
+      var filteredList = all.filter(function(s) {
+        if (statusFilter !== 'ALL' && s.downhillStatus.indexOf(statusFilter) !== 0) return false;
+        if (qSearch) return s.last4.indexOf(qSearch) !== -1 || s.nick.toLowerCase().indexOf(qSearch) !== -1 || s.name.toLowerCase().indexOf(qSearch) !== -1;
+        return true;
+      });
+
+      var gridBox = document.getElementById('dh-sorted-dots-grid');
+      gridBox.innerHTML = '';
+      var frag = document.createDocumentFragment();
+
+      filteredList.forEach(function(stu) {
+        var isPicked = dhState.cartIds.indexOf(stu.id) !== -1;
+        var dotCls = getDownhillDotClass(stu.downhillStatus) + (isPicked ? ' in-my-cart-ring' : '');
+
+        // แสดงป้ายชื่อสตาฟเฉพาะเมื่อมีชื่อสตาฟอยู่จริง (ถ้ากดลบออกจากตะกร้าแล้ว ป้ายนี้จะหายไปทันที!)
+        var staffShort = (stu.downhillStaffName && stu.downhillStaffName !== '-') ? stu.downhillStaffName.split(' ')[0] : '';
+        var staffBadgeHtml = staffShort ? '<div class="staff-car-pill">🚌 พี่' + staffShort + '</div>' : '';
+        var grabBadgeHtml = (stu.downhillNote && stu.downhillNote !== '-') ? '<div style="font-size:9px; font-weight:700; color:#047857; background:#D1FAE5; padding:1px 6px; border-radius:999px; margin-top:2px; max-width:68px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + stu.downhillNote + '</div>' : '';
+
+        var cell = document.createElement('div');
+        cell.style.cssText = 'text-align:center; cursor:pointer; display:flex; flex-direction:column; align-items:center;';
+        cell.innerHTML =
+          '<div class="dot-circle ' + dotCls + '">' + (isPicked ? '✓' : '') + stu.last4 + '</div>' +
+          '<div style="font-size:10px; font-weight:700; margin-top:4px; max-width:68px; overflow:hidden; text-overflow:ellipsis; white-space:nowrap;">' + stu.nick + '</div>' +
+          staffBadgeHtml + grabBadgeHtml;
+
+        cell.addEventListener('click', function() { toggleStudentInCart(stu.id); });
+        frag.appendChild(cell);
+      });
+
+      gridBox.appendChild(frag);
+    }
+
+    function showDhToast(msg) {
+      var b = document.getElementById('dh-toast');
+      document.getElementById('dh-toast-txt').textContent = msg;
+      b.classList.remove('hidden');
+      setTimeout(function() { b.classList.add('hidden'); }, 2600);
+    }
+  </script>
+</body>
+</html>
